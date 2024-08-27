@@ -1,3 +1,5 @@
+#include "stm32h743xx.h"
+
 
 typedef char            Int8;
 typedef unsigned char   UInt8;
@@ -7,5 +9,5 @@ typedef long            Int32;
 typedef unsigned long   UInt32;
 
 
-void addTask (UInt8 priority, void (*taskFunction)(void), void (*taskSetup)(void));
+void addTask (UInt8 priority, void (*taskFunction)(void));
 void scheduler (void);
