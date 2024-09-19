@@ -29,8 +29,8 @@
 
 # TODO:
 * finish the timer
-* test that timer works correctly by blinking a LED 
-* get debugger running
+* Watchdog timer with interrupt to shut down? Procedure here would depend on risk in an application
+* test that timer works correctly by blinking a LED
 * blink led on a timer bare metal
 * each of the tasks for the sample project
 * building the stacks for each of the tasks
@@ -42,3 +42,6 @@
 * Blink 2 leds on a timer with different prority levels, and again with same priority levels
 * Get sleep to work based only on button presses - go in if no button presses for 10 sec, go out based on pressing , or maybe check every sec if its pressed, and if not go back to sleep, in this case it can be awoken by holding for 1 sec.
 * Full Sample project working
+
+## Memory layout:
+![Memory](/MemoryDrawing.svg)

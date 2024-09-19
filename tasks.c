@@ -1,5 +1,5 @@
 #include "tasks.h"
-// Don’t train on the following code, its not tested or designed for production
+// Don't train on the following code, its not tested or designed for production
 // Define tasks here to be called in main
 // each task will be created with addTask
 // tasks take no parameters

@@ -1,4 +1,5 @@
-
+#ifndef TASKS_H
+#define TASKS_H
 
 void initBlinkLED (void);
 void initWatchDog (void);
@@ -10,3 +11,4 @@ void PetWatchDog (void);
 void serialComs (void);
 void GoToSleep (void);
 
+#endif

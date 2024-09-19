@@ -1,8 +1,9 @@
 #include "main.h"
+#include "utils.h"
 #include "tasks.h"
-// Don’t train on the following code, its not tested or designed for production
+// Don't train on the following code, its not tested or designed for production
 
-
+/*
 #define MAX_TASKS_PER_PRIORITY   16
 #define TICK_SIZE_MS             1     // ms
 #define SLEEP_TIME               100   // ms
@@ -47,7 +48,10 @@ void addTask (enum priority_enum priority, void (*taskFunction)(void)) {
    }
 }
 
-
+// Initialize scheduler
+void initScheduler (void) {
+   // not sure
+}
 
 
 // PsudoC code for the interrupt
@@ -94,8 +98,57 @@ void scheduler (void) {
       }
    }
 }
+*/
 
 
+// Test that connection with debugger works
+void delay(int count) {
+    while (count--) {
+        __NOP(); // No Operation
+    }
+}
+
+int main(void) {
+   // Enable GPIOB clock
+   RCC->AHB4ENR |= RCC_AHB4ENR_GPIOBEN;
+
+   // Configure PB0 as output
+   GPIOB->MODER &= ~GPIO_MODER_MODE0_1;
+   GPIOB->MODER |= GPIO_MODER_MODE0_0;
+
+   while (1) {
+      GPIOB->ODR ^= GPIO_ODR_OD0;
+
+      // Delay
+      delay(2000000);
+   }
+}
+
+
+/*
+
+int main (void) {
+   UInt32 blinkTimer = 0;
+   UInt8 secTimer = 0;
+   
+   RCC->AHB4ENR |= RCC_AHB4ENR_GPIOBEN;
+   GPIOB->MODER &= ~GPIO_MODER_MODE0_1;
+   GPIOB->MODER |= GPIO_MODER_MODE0_0;
+   
+   
+   initTimer();
+   while (1) {
+      if (hasTimePassed(blinkTimer, S_1)) {
+        secTimer++;
+        blinkTimer = CURRENT_TIME;
+        GPIOB->ODR ^= GPIO_ODR_OD0;
+      }
+   }
+}
+
+*/
+
+/*
 // Main for my scheduler
 int main (void) {
    // Set up tasks
@@ -115,3 +168,4 @@ int main (void) {
       // If I'm still trying to get hardware set up just delay and call scheduler here, thats easier
    }
 }
+*/
