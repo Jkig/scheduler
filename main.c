@@ -3,14 +3,26 @@
 #include "tasks.h"
 // Don't train on the following code, its not tested or designed for production
 
-/*
+
 #define MAX_TASKS_PER_PRIORITY   16
 #define TICK_SIZE_MS             1     // ms
 #define SLEEP_TIME               100   // ms
 #define WATCHDOG_TIMEOUT         10    // ms
 
+
+// these numbers are all *4, but C does that under the hood for UInt32 pointers
+#define PRIORITY_OFFSET          1000*16     // * 0 for top priority, *1 for middle, and *2 for lowest priority
+#define TASK_OFFSET              1000        // size of task, *task number indexed with a 0
+#define TASK_STACK_BASE          17          // distance from the base of the memory of the task where the task's stack starts
+
+
+
 enum priority_enum {MIN_PRIORITY, MED_PRIORITY, MAX_PRIORITY};
 
+
+// I can just put the global values I need here, current task number, base of stack for new operations (do interrupts there)
+UInt32 psudoBaseAddress;// so I don't need to have below be null
+UInt32 *baseAddress = &psudoBaseAddress;
 
 // for now, just 3 priority levels, and 16 tasks maximum per priority level
 static UInt16 topPriority = 0x0000;   // This hold the state of the tasks, 1 means it needs to run
@@ -33,6 +45,34 @@ static UInt8 midTaskIndex;
 static UInt8 lowTaskIndex;
 
 
+// for each task, allow it to kill by calling a function within its main loop.
+
+
+// task psudoCcode:
+/*
+void task(){
+   // start up variables
+   
+   while (keeprunning_task == 1){
+      // task functionality
+   }
+   endTask(taskNumber);
+}
+*/
+
+/*
+void endTask(UInt8 taskNumber);
+
+void endTask(UInt8 taskNumber) {
+   // just set the memory left behind to zeros
+   
+   // and tell it that we are done running it
+   // update the 2 uint16 about task status
+   // not in progress
+   // "not ready"?
+}
+*/
+
 
 void addTask (enum priority_enum priority, void (*taskFunction)(void)) {
    // lower priority value is lower in priority, EX: 2 supersedes 1
@@ -50,7 +90,7 @@ void addTask (enum priority_enum priority, void (*taskFunction)(void)) {
 
 // Initialize scheduler
 void initScheduler (void) {
-   // not sure
+   // Not sure If I want anything here
 }
 
 
@@ -98,74 +138,67 @@ void scheduler (void) {
       }
    }
 }
-*/
 
 
-// Test that connection with debugger works
-void delay(int count) {
-    while (count--) {
-        __NOP(); // No Operation
-    }
+void TIM3_Init(void) {
+    // Enable TIM3 clock
+    RCC->APB1LENR |= RCC_APB1LENR_TIM3EN;
+    TIM3->PSC = 119999;
+    TIM3->ARR = 1; // only need 1 tick
+    TIM3->DIER |= TIM_DIER_UIE;// Interrupt
+   
+    NVIC_EnableIRQ(TIM3_IRQn);
+    TIM3->CR1 |= TIM_CR1_CEN;
 }
 
-int main(void) {
-   // Enable GPIOB clock
-   RCC->AHB4ENR |= RCC_AHB4ENR_GPIOBEN;
-
-   // Configure PB0 as output
-   GPIOB->MODER &= ~GPIO_MODER_MODE0_1;
-   GPIOB->MODER |= GPIO_MODER_MODE0_0;
-
-   while (1) {
-      GPIOB->ODR ^= GPIO_ODR_OD0;
-
-      // Delay
-      delay(2000000);
-   }
-}
-
-
-/*
-
-int main (void) {
-   UInt32 blinkTimer = 0;
-   UInt8 secTimer = 0;
-   
-   RCC->AHB4ENR |= RCC_AHB4ENR_GPIOBEN;
-   GPIOB->MODER &= ~GPIO_MODER_MODE0_1;
-   GPIOB->MODER |= GPIO_MODER_MODE0_0;
+// Called every ms
+void TIM3_IRQHandler(void) {
+   // Check if update interrupt flag is set
+   static UInt32 counter;// so I can see that this is triggering automatically and test via a gpio/LED
    
    
-   initTimer();
-   while (1) {
-      if (hasTimePassed(blinkTimer, S_1)) {
-        secTimer++;
-        blinkTimer = CURRENT_TIME;
-        GPIOB->ODR ^= GPIO_ODR_OD0;
+   if (TIM3->SR & TIM_SR_UIF) {
+      // Clear update interrupt flag
+      TIM3->SR &= ~TIM_SR_UIF;
+      // do my scheduling tasks
+      counter++;
+      
+      if (counter > 1000){
+         counter = 0;
+         GPIOB->ODR ^= GPIO_ODR_OD0;
+         GPIOB->ODR ^= GPIO_ODR_OD14;
       }
    }
 }
-
-*/
-
 /*
-// Main for my scheduler
-int main (void) {
-   // Set up tasks
-   initBlinkLED();
-   initWatchDog();
-   initSerialComs();
-   initGoToSleep();
+void newStackMem(void) {
+   UInt8 a;
+   UInt8* aptr;
+}*/
+
+// start for my main
+int main () {
+    __enable_irq();  // enable interrupts
+   TIM3_Init();      // Timer to start scheduler interrupt
+   initTimer();      // My .1ms general puropse timer
    
-   // Add tasks to be scheduled
-   addTask(MED_PRIORITY, &blinkLED);
-   addTask(MAX_PRIORITY, &PetWatchDog);
-   addTask(MED_PRIORITY, &serialComs);
-   addTask(MIN_PRIORITY, &GoToSleep);
    
+   initUserLED();
+   initUserLED2();
+   
+   
+   // Lay out my memory map as in picture, and move stack base
+   // I should be able to use the constant: 0x24000268, this is the start of the stack if I do nothing, but if any memory is allocated the whole layout will be off
+   // So I'll just do calculatios off this
+   UInt32 base;
+   baseAddress = &base;
+   // I'll end up giving myself 1000 * 32 bits for total stack for each task, the first 16 (or 17 for status register too?) for arm registers, then start the stack up
+   UInt32 *newStackBase = baseAddress - (1000*3*16);// stack grows down
+   // Move the stack pointer to after all the tasks memory, be carefull with pointer arithmatic, UInt32 *ptr + 1 => ptr + 4
+   // 1000(memory size)*16(number of task for each priority)*3(levels of priority) (*4 but C does that already because its on a UInt32 pointer)
+   // memory is layed out how I want it now, see graphic in readme
    while (1) {
-      // nothing happens in the main loop, interrupts run the scheduler periodically, and decide the tasks to run
-      // If I'm still trying to get hardware set up just delay and call scheduler here, thats easier
+      // wait for interrupt to run
    }
 }
-*/
+

@@ -13,5 +13,7 @@
 
 void initTimer(void);
 _Bool hasTimePassed (UInt32 start, UInt32 end);
+void initUserLED(void);
+void initUserLED2(void);
 
 #endif

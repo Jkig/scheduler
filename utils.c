@@ -32,3 +32,23 @@ _Bool hasTimePassed (UInt32 start, UInt32 length) {
    //    I'm not going to worry about filling this up, it won't run that long
    return ((CURRENT_TIME - start) >= length);
 }
+
+void initUserLED(void) {
+   RCC->AHB4ENR |= RCC_AHB4ENR_GPIOBEN;
+   GPIOB->MODER &= ~GPIO_MODER_MODE0_1;
+   GPIOB->MODER |= GPIO_MODER_MODE0_0;
+}
+
+
+void initUserLED2(void) {
+   GPIOB->MODER &= ~GPIO_MODER_MODE14;
+   GPIOB->MODER |= GPIO_MODER_MODE14_0;
+}
+
+
+/*
+    // Set PB0 (LD2) as output
+    GPIOB->MODER &= ~GPIO_MODER_MODE0;  // Clear MODER bits for PB0
+    GPIOB->MODER |= GPIO_MODER_MODE0_0; // Set PB0 as output (01)
+*/
+
