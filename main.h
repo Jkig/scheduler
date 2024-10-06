@@ -11,6 +11,7 @@ typedef unsigned long   UInt32;
 
 
 void addTask (UInt8 priority, void (*taskFunction)(void));
+void TIM3_Init(void);// initialize scheduler interrupt
 void initScheduler (void);
 void scheduler (void);
 void delay(int count);
