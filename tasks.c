@@ -19,9 +19,14 @@ void initBlinkLED (void) {
 void blinkLED (void) {
    // doesn't need to return anything, if it needs to just keep going, external logic may stop this function?
    UInt32 blinkTimer = 0;
+   UInt32 myCounter = 0;
    // UInt8 blinkCount = 100;// could have the task end after X blinks
    // blink a LED on a timer
-   while (1) {
+   
+   __enable_irq();  // enable interrupts
+   TIM3->SR &= ~TIM_SR_UIF;
+   TIM3->DIER |= TIM_DIER_UIE;
+   while (myCounter++ < 0xFFFFF) {
       if (hasTimePassed(blinkTimer, S_1)) {
         blinkTimer = CURRENT_TIME;
         GPIOB->ODR ^= GPIO_ODR_OD0;
@@ -40,9 +45,9 @@ void blinkLED2 (void) {
    // UInt8 blinkCount = 100;// could have the task end after X blinks
    // blink a LED on a timer
    while (1) {
-      if (hasTimePassed(blinkTimer, S_1)) {
+      if (hasTimePassed(blinkTimer, S_1/2)) {
         blinkTimer = CURRENT_TIME;
-        GPIOB->ODR ^= GPIO_ODR_OD0;
+        GPIOB->ODR ^= GPIO_ODR_OD14;
       }
    }
 }
