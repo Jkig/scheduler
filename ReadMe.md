@@ -8,18 +8,20 @@
 
 
 # Simple demonstrations:
-1. task switching, and show with debugger its one then the other
+1. Task switching for same level.
 2. A high priority task stopping a task of lower priority until complete
-3. build a higer priority task to stop a lower priority task to block the lower, then complete
-4. Show how saving state works with real computation (perhaps just increase count but wait with blocking timer and see that it continues) (maybe fibbinacci)
+3. blocking task doesn't actually block others
 
 
 ## How its used:
-* Define a task by calling addTask and passing in priority and a function pointer
+* Define a task by calling addTask and passing in priority and a function's address
 
 
 # How this project could be expanded:
 * Variable stack size
 * Go to scheduler if you hit the end of a task before the end
+* Make a timer that is interupt driven so you can wait for something and yeild processor
 * More complex or choose your own priority system
+* Hoisting priority so 
+* More automatic end task, so it can be called with no parameters and end automatically, or just have the task ending by getting to the end of the function that describes it. Ex: LR is to endtask that can detect which task, and yield to scheduler.
 

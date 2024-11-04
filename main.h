@@ -23,6 +23,11 @@ typedef unsigned long   UInt32;
 #define TASK_STACK_BASE          17          // distance from the base of the memory of the task where the task's stack starts
 
 
+typedef struct{
+   UInt32 *topOfStack;// Technically a pointer, But I only touch with asm
+   UInt32 r4throu11[8];
+   UInt32 psp;
+} TaskInfo;
 
 enum priority_enum {MIN_PRIORITY, MED_PRIORITY, MAX_PRIORITY};
 
