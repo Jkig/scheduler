@@ -10,7 +10,7 @@ static UInt8 TopTaskToStart;
 static UInt8 MidTaskToStart;
 static UInt8 LowTaskToStart;
 
-static struct {UInt32* r4r11; UInt32 psp;UInt32 *topOfStack;UInt32 *rawTopOfStack} addresses;
+static struct {UInt32* r4r11; UInt32 *topOfStack;UInt32 *rawTopOfStack} addresses;
 static volatile UInt32 *r4r11 = 0;// gcc crashes at runtime when returning from interrupt if this is in the struct above?
 static UInt32 counter;
 static UInt16 i=0;
@@ -58,7 +58,6 @@ void TIM3_IRQHandler(void) {// TODO: prep for recovery almost htere
    }
    else {
       addresses.r4r11 = &Tasks[lastTaskPriority*16 + lastTaskNum].r4throu11[0];
-      addresses.psp = Tasks[lastTaskPriority*16 + lastTaskNum].psp;
       addresses.topOfStack = &Tasks[lastTaskPriority*16 + lastTaskNum].topOfStack;
 
       __DSB();
@@ -161,7 +160,6 @@ void TIM3_IRQHandler(void) {// TODO: prep for recovery almost htere
    else
    {
       addresses.r4r11 = &Tasks[lastTaskPriority*16 + lastTaskNum].r4throu11[0];
-      addresses.psp = Tasks[lastTaskPriority*16 + lastTaskNum].psp;
       addresses.topOfStack = &Tasks[lastTaskPriority*16 + lastTaskNum].topOfStack;
       *addresses.topOfStack += 8;
       // Restore context of the next task
@@ -186,4 +184,8 @@ void TIM3_IRQHandler(void) {// TODO: prep for recovery almost htere
       );
    }
 }
+
+
+
+
 
