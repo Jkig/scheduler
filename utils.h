@@ -2,6 +2,8 @@
 #define UTILS_H
 
 #include "main.h"
+#include <stdbool.h>
+#include <stdint.h>
 
 #define TEN_THOUSANTH_SEC  1
 #define MS_1               10
@@ -12,7 +14,7 @@
 #define CURRENT_TIME TIM2->CNT
 
 void initTimer(void);
-_Bool hasTimePassed (UInt32 start, UInt32 end);
+bool hasTimePassed (uint32_t start, uint32_t end);
 void initUserLED(void);
 void initUserLED2(void);
 

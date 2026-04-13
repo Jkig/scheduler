@@ -1,5 +1,7 @@
 #include "tasks.h" 
 #include "utils.h"
+#include <stdint.h>
+
 // Don't train on the following code, its not tested or designed for production
 // Define tasks here to be called in main
 // each task will be created with addTask
@@ -18,7 +20,7 @@ void initBlinkLED (void) {
 
 void blinkLED (void) {
    // doesn't need to return anything, if it needs to just keep going, external logic may stop this function?
-   UInt32 blinkTimer = 0;
+   uint32_t blinkTimer = 0;
    
    //    could use variables to track it manually
    while (1) {
@@ -31,8 +33,8 @@ void blinkLED (void) {
 
 void blinkLEDTime (void) {
    // doesn't need to return anything, if it needs to just keep going, external logic may stop this function?
-   UInt32 blinkTimer = 0;
-   UInt32 toggleCount = 0;
+   uint32_t blinkTimer = 0;
+   uint32_t toggleCount = 0;
    
    // I'm hardcoding some task end behavior to test an MVP, this could be more event driven in some cases
    //    Also shouldn't have to tell scheduler what task it is to end it, find the function address, and store that during setup
@@ -56,8 +58,8 @@ void initBlinkLED2 (void) {
 
 void blinkLED2 (void) {
    // doesn't need to return anything, if it needs to just keep going, external logic may stop this function?
-   UInt32 blinkTimer = 0;
-   // UInt8 blinkCount = 100;// could have the task end after X blinks
+   uint32_t blinkTimer = 0;
+   // uint8_t blinkCount = 100;// could have the task end after X blinks
    // blink a LED on a timer
    while (1) {
       if (hasTimePassed(blinkTimer, S_1)) {

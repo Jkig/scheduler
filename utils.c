@@ -1,11 +1,12 @@
 #include "main.h"
 #include "utils.h"
-
+#include <stdint.h>
+#include <stdbool.h>
 
 // function returns true if a specified amount of time has passed
 
 void initTimer(void){
-   UInt16 delay = 10000;
+   uint16_t delay = 10000;
    RCC->APB1LENR |= RCC_APB1LENR_TIM2EN;   // TIM2 is on APB1, 120 MHz max clock, which is where I set it
    while (delay--);
    delay = 10000;
@@ -27,7 +28,7 @@ void initTimer(void){
 
 
 
-_Bool hasTimePassed (UInt32 start, UInt32 length) {
+bool hasTimePassed (uint32_t start, uint32_t length) {
    // Some constraints, I can only store values up to ~5 days, 
    //    I'm not going to worry about filling this up, it won't run that long
    return ((CURRENT_TIME - start) >= length);

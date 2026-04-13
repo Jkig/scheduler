@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include "main.h"
 #include "utils.h"
 #include "tasks.h"
@@ -6,36 +7,36 @@
 
 
 // I can just put the global values I need here, current task number, base of stack for new operations (do interrupts there)
-UInt32 psudoBaseAddress;// so I don't need to have below be null
-UInt32 *baseAddress = &psudoBaseAddress;
+uint32_t psudoBaseAddress;// so I don't need to have below be null
+uint32_t *baseAddress = &psudoBaseAddress;
 
 // for now, just 3 priority levels, and 16 tasks maximum per priority level
-UInt16 topPriority = 0x0000;   // This hold the state of the tasks, 1 means it is running, may or may not have started
-UInt16 midPriority = 0x0000;
-UInt16 lowPriority = 0x0000;
+uint16_t topPriority = 0x0000;   // This hold the state of the tasks, 1 means it is running, may or may not have started
+uint16_t midPriority = 0x0000;
+uint16_t lowPriority = 0x0000;
 
-UInt16 topFirstCall = 0x0000;   // This hold the state of the tasks, 1 means it is running, may or may not have started
-UInt16 midFirstCall = 0x0000;
-UInt16 lowFirstCall = 0x0000;
+uint16_t topFirstCall = 0x0000;   // This hold the state of the tasks, 1 means it is running, may or may not have started
+uint16_t midFirstCall = 0x0000;
+uint16_t lowFirstCall = 0x0000;
 
 // Hold the index of the function of the next task to be added
-UInt8 topTaskIndex;
-UInt8 midTaskIndex;
-UInt8 lowTaskIndex;
+uint8_t topTaskIndex;
+uint8_t midTaskIndex;
+uint8_t lowTaskIndex;
 
 // coult have an array of pointers to above to simplify some things, less if top, mid, low...
 
 // Going from setup to operation
 _Bool allSetup;
-UInt8 lastTaskPriority; // for offsets, 0 is the max, 1 is mid, 2 is low
-UInt8 lastTaskNum;// task to be ran// need to move this over to one for each priority level
-UInt32 genStackBaseBeforeReg;
+uint8_t lastTaskPriority; // for offsets, 0 is the max, 1 is mid, 2 is low
+uint8_t lastTaskNum;// task to be ran// need to move this over to one for each priority level
+uint32_t genStackBaseBeforeReg;
 
 volatile TaskInfo Tasks[16*3];
 
 
 
-void endTask(enum priority_enum priority, UInt8 taskNumber) {
+void endTask(enum priority_enum priority, uint8_t taskNumber) {
    // Set to not initialized, and no task there.
    // Don't need to clean up memory, as that will happen when writing a new task to that location
    // things beyond that will not cause a problem because they are beyond the stack, until overrwitten
@@ -54,9 +55,9 @@ void endTask(enum priority_enum priority, UInt8 taskNumber) {
 }
 
 // forget about priority for a min
-UInt8 addTask (enum priority_enum priority, void (*taskFunction)(void)) {
+uint8_t addTask (enum priority_enum priority, void (*taskFunction)(void)) {
    // lowTaskIndex, and bassAddress are globals
-   UInt32 *newStackBase = 0;
+   uint32_t *newStackBase = 0;
    
    if (priority == MAX_PRIORITY) {
       newStackBase = baseAddress - (PRIORITY_OFFSET*priority + topTaskIndex*TASK_OFFSET);
@@ -71,7 +72,7 @@ UInt8 addTask (enum priority_enum priority, void (*taskFunction)(void)) {
    
 
    *(--newStackBase) = 0x01000000;           // xPSR (Thumb bit set)
-   *(--newStackBase) = (UInt32)taskFunction; // PC
+   *(--newStackBase) = (uint32_t)taskFunction; // PC
    *(--newStackBase) = 0xFFFFFFFD;           // LR (Return to Thread mode)
    *(--newStackBase) = 0;                    // R12
    *(--newStackBase) = 0;                    // R3
@@ -100,9 +101,9 @@ int main (void) {
    // within the task, the first 8 * 4 bytes (12 words) (registers 4-11 and psp)
    //    then the start of the stack
    //    the rest of the registers will be on the top of the stack for the task
-   UInt32 base;
+   uint32_t base;
    baseAddress = &base;
-   UInt32 *newStackBase = baseAddress - (PRIORITY_OFFSET*3) - 1;// stack grows down, 1 space for newstack base declaration
+   uint32_t *newStackBase = baseAddress - (PRIORITY_OFFSET*3) - 1;// stack grows down, 1 space for newstack base declaration
    __asm volatile (
       "mov sp, %0\n"
       : 

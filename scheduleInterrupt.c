@@ -2,24 +2,25 @@
 #include "utils.h"
 #include "tasks.h"
 #include "scheduleInterrupt.h"
+#include <stdint.h>
+#include <stdbool.h>
 
+static bool firstcall = false;
+static bool thisPassFirstCall;
+static uint8_t TopTaskToStart;
+static uint8_t MidTaskToStart;
+static uint8_t LowTaskToStart;
 
-static _Bool firstcall = 0;
-static _Bool thisPassFirstCall;
-static UInt8 TopTaskToStart;
-static UInt8 MidTaskToStart;
-static UInt8 LowTaskToStart;
-
-static struct {UInt32* r4r11; UInt32 *topOfStack;UInt32 *rawTopOfStack} addresses;
-static volatile UInt32 *r4r11 = 0;// gcc crashes at runtime when returning from interrupt if this is in the struct above?
-static UInt32 counter;
-static UInt16 i=0;
-UInt32 *newStackBase = 0;
+static struct {uint32_t* r4r11; uint32_t *topOfStack;uint32_t *rawTopOfStack} addresses;
+static volatile uint32_t *r4r11 = 0;// gcc crashes at runtime when returning from interrupt if this is in the struct above?
+static uint32_t counter;
+static uint16_t i=0;
+uint32_t *newStackBase = 0;
 
 
 // Initialize scheduler
 void TIM3_Init(void) {
-   UInt16 delay = 10000;
+   uint16_t delay = 10000;
    // Enable TIM3 clock
    RCC->APB1LENR |= RCC_APB1LENR_TIM3EN;
    while (delay--);
@@ -43,8 +44,8 @@ void TIM3_Init(void) {
 
 
 void TIM3_IRQHandler(void) {// TODO: prep for recovery almost htere
-   //static UInt8 TopTaskToStart;
-   // static UInt8 MidTaskToStart;
+   //static uint8_t TopTaskToStart;
+   // static uint8_t MidTaskToStart;
    
    TIM3->SR &= ~TIM_SR_UIF;// Clear update interrupt flag
    __disable_irq();
@@ -54,7 +55,7 @@ void TIM3_IRQHandler(void) {// TODO: prep for recovery almost htere
    // save the last task where we want it
    if (!firstcall) {
       // Don't save the info if not coming from a call, I could seperately have a method to go back to this state if tasks came in during runtime
-      firstcall = 1;
+      firstcall = true;
    }
    else {
       addresses.r4r11 = &Tasks[lastTaskPriority*16 + lastTaskNum].r4throu11[0];
@@ -123,22 +124,22 @@ void TIM3_IRQHandler(void) {// TODO: prep for recovery almost htere
    
    // restore to this position
    // if this task hasn't begun yet, then I need to adjust the stack manually.
-   thisPassFirstCall = 0;
+   thisPassFirstCall = false;
    if (lastTaskPriority == MAX_PRIORITY){
       if ((topFirstCall & (1 << lastTaskNum)) == 0) {
          topFirstCall |= (1 << lastTaskNum);
-         thisPassFirstCall = 1;
+         thisPassFirstCall = true;
       }
    }else if (lastTaskPriority == MED_PRIORITY){
       if ((midFirstCall & (1 << lastTaskNum)) == 0) {
          midFirstCall |= (1 << lastTaskNum);
-         thisPassFirstCall = 1;
+         thisPassFirstCall = true;
       }
    }
    else {
       if ((lowFirstCall & (1 << lastTaskNum)) == 0){
          lowFirstCall |= (1 << lastTaskNum);
-         thisPassFirstCall = 1;
+         thisPassFirstCall = true;
       }
    }
    

@@ -2,13 +2,8 @@
 
 #ifndef MAIN_H
 #define MAIN_H
-typedef char            Int8;
-typedef unsigned char   UInt8;
-typedef short           Int16;
-typedef unsigned short  UInt16;
-typedef long            Int32;
-typedef unsigned long   UInt32;
 
+#include <stdint.h>
 
 
 // Scheduler constants:
@@ -17,22 +12,22 @@ typedef unsigned long   UInt32;
 #define SLEEP_TIME               100   // ms
 #define WATCHDOG_TIMEOUT         10    // ms
 
-// these numbers are all *4, but C does that under the hood for UInt32 pointers
+// these numbers are all *4, but C does that under the hood for uint32_t pointers
 #define TASK_OFFSET              1000        // size of task, *task number indexed with a 0
 #define PRIORITY_OFFSET          TASK_OFFSET*16     // * 0 for top priority, *1 for middle, and *2 for lowest priority
 #define TASK_STACK_BASE          17          // distance from the base of the memory of the task where the task's stack starts
 
 
 typedef struct{
-   UInt32 *topOfStack;// Technically a pointer, But I only touch with asm
-   UInt32 r4throu11[8];
-   UInt32 psp;
+   uint32_t *topOfStack;// Technically a pointer, But I only touch with asm
+   uint32_t r4throu11[8];
+   uint32_t psp;
 } TaskInfo;
 
 enum priority_enum {MIN_PRIORITY, MED_PRIORITY, MAX_PRIORITY};
 
-UInt8 addTask (UInt8 priority, void (*taskFunction)(void));
-void endTask(enum priority_enum priority, UInt8 taskNumber);
+uint8_t addTask (uint8_t priority, void (*taskFunction)(void));
+void endTask(enum priority_enum priority, uint8_t taskNumber);
 void TIM3_Init(void);// initialize scheduler interrupt
 void initScheduler (void);
 void scheduler (void);
